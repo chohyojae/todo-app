@@ -20,38 +20,33 @@ const App = () => {
 
   const nextId = useRef(() => todos.length + 1);
 
-  const onInsert = useCallback(
-    (text) => {
-      const todo = {
-        id: nextId.current,
-        text,
-        checked: false,
-      };
+  const onInsert = useCallback((text) => {
+    const todo = {
+      id: nextId.current,
+      text,
+      checked: false,
+    };
 
-      setTodos(todos.concat(todo));
-      nextId.current += 1;
-    },
-    [todos],
-  );
+    setTodos((todos) => todos.concat(todo));
+    nextId.current += 1;
+  }, []);
 
   const onRemove = useCallback(
-    (item) => {
+    (item) => (todos) => {
       const newTodos = todos.filter((todo) => todo.id !== item.id);
       console.log(newTodos);
-      setTodos(newTodos);
+      setTodos((todos) => newTodos());
     },
-    [todos],
+    [],
   );
 
-  const onCheckboxToggle = useCallback(
-    (item) => {
-      const newTodos = todos.map((todo) => {
+  const onCheckboxToggle = useCallback((item) => {
+    const newTodos = (todos) =>
+      todos.map((todo) => {
         return todo.id === item.id ? { ...todo, checked: !todo.checked } : todo;
       });
-      setTodos(newTodos);
-    },
-    [todos],
-  );
+    setTodos(newTodos);
+  }, []);
 
   return (
     <TodoTemplate>
