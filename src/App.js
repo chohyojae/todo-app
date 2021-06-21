@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useReducer, useRef, useCallback } from 'react';
 import TodoTemplate from './components/TodoTemplate';
 import TodoInsert from './components/TodoInsert';
 import TodoList from './components/TodoList';
@@ -15,37 +15,52 @@ function createBulkTodos() {
   return array;
 }
 
+function todoReceiver(todos, action) {
+  let ret;
+  switch (action.type) {
+    case 'INSERT':
+      ret = todos.concat(action.todo);
+      break;
+    case 'REMOVE':
+      ret = todos.filter((todo) => todo.id !== action.id);
+      break;
+    case 'TOGGLE':
+      ret = todos.map((todo) =>
+        todo.id === action.id ? { ...todo, checked: !todo.checked } : todo,
+      );
+      break;
+    default:
+      break;
+  }
+  return ret;
+}
+
 const App = () => {
-  const [todos, setTodos] = useState(createBulkTodos);
+  const [todos, dispatch] = useReducer(
+    todoReceiver,
+    undefined,
+    createBulkTodos,
+  );
 
   const nextId = useRef(() => todos.length + 1);
 
   const onInsert = useCallback((text) => {
-    const todo = {
-      id: nextId.current,
+    const newTodo = {
+      id: nextId.current++,
       text,
       checked: false,
     };
-
-    setTodos((todos) => todos.concat(todo));
-    nextId.current += 1;
+    dispatch({ type: 'INSERT', newTodo });
   }, []);
 
-  const onRemove = useCallback(
-    (item) => (todos) => {
-      const newTodos = todos.filter((todo) => todo.id !== item.id);
-      console.log(newTodos);
-      setTodos((todos) => newTodos());
-    },
-    [],
-  );
+  const onRemove = useCallback((item) => dispatch(item), []);
 
   const onCheckboxToggle = useCallback((item) => {
     const newTodos = (todos) =>
       todos.map((todo) => {
         return todo.id === item.id ? { ...todo, checked: !todo.checked } : todo;
       });
-    setTodos(newTodos);
+    dispatch({ type: 'TOGGLE', newTodos });
   }, []);
 
   return (
