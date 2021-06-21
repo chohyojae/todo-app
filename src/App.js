@@ -43,10 +43,24 @@ const App = () => {
     [todos],
   );
 
+  const onCheckboxToggle = useCallback(
+    (item) => {
+      const newTodos = todos.map((todo) => {
+        return todo.id === item.id ? { ...todo, checked: !todo.checked } : todo;
+      });
+      setTodos(newTodos);
+    },
+    [todos],
+  );
+
   return (
     <TodoTemplate>
       <TodoInsert onInsert={onInsert} />
-      <TodoList todos={todos} onRemove={onRemove} />
+      <TodoList
+        todos={todos}
+        onRemove={onRemove}
+        onCheckboxToggle={onCheckboxToggle}
+      />
     </TodoTemplate>
   );
 };
