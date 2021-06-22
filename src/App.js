@@ -8,7 +8,7 @@ function createBulkTodos() {
   for (let i = 0; i < 2500; i++) {
     array.push({
       id: i + 1,
-      text: `할 일 #${i}`,
+      text: `할 일 #${i + 1}`,
       checked: i % 2 !== 0 ? true : false,
     });
   }
@@ -19,17 +19,19 @@ function todoReceiver(todos, action) {
   let ret;
   switch (action.type) {
     case 'INSERT':
+      console.log(action.todo);
       ret = todos.concat(action.todo);
       break;
     case 'REMOVE':
-      ret = todos.filter((todo) => todo.id !== action.id);
+      ret = todos.filter((todo) => todo !== action.todo);
       break;
     case 'TOGGLE':
       ret = todos.map((todo) =>
-        todo.id === action.id ? { ...todo, checked: !todo.checked } : todo,
+        todo === action.todo ? { ...todo, checked: !todo.checked } : todo,
       );
       break;
     default:
+      ret = todos;
       break;
   }
   return ret;
@@ -42,25 +44,26 @@ const App = () => {
     createBulkTodos,
   );
 
-  const nextId = useRef(() => todos.length + 1);
+  const nextId = useRef(todos.length + 1);
 
   const onInsert = useCallback((text) => {
     const newTodo = {
-      id: nextId.current++,
+      id: nextId.current,
       text,
       checked: false,
     };
-    dispatch({ type: 'INSERT', newTodo });
+    dispatch({ type: 'INSERT', todo: newTodo });
+    nextId.current++;
   }, []);
 
-  const onRemove = useCallback((item) => dispatch(item), []);
+  const onRemove = useCallback(
+    (item) => dispatch({ type: 'REMOVE', todo: item }),
+    [],
+  );
 
   const onCheckboxToggle = useCallback((item) => {
-    const newTodos = (todos) =>
-      todos.map((todo) => {
-        return todo.id === item.id ? { ...todo, checked: !todo.checked } : todo;
-      });
-    dispatch({ type: 'TOGGLE', newTodos });
+    console.log('onCheckboxToggle, id:' + item.id);
+    return dispatch({ type: 'TOGGLE', todo: item });
   }, []);
 
   return (

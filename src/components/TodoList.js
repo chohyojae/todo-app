@@ -19,4 +19,4 @@ const TodoList = ({ todos, onRemove, onCheckboxToggle }) => {
   );
 };
 
-export default TodoList;
+export default React.memo(TodoList);
